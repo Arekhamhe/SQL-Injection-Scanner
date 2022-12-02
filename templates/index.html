@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body style="display: flex; justify-content: center; align-items: center; flex-direction: column; height: 100vh;">
+    <form method="post" style="margin-bottom: 3em;">
+       <fieldset style="max-width: 500px;">
+        <legend>SQL Injection Scanner</legend>
+        <label for="url">URL to be checked</label>
+        <input type="text" name="url" id="url">
+        <button type="submit">Check</button>
+       </fieldset>
+    </form>
+   {% if responses %}
+   <fieldset style="max-width: 500px;">
+    <legend>Response</legend>
+    <ul>
+        {% for response in responses %}
+            <li>{{response}}</li>
+        {% endfor %}
+    </ul>
+   </fieldset>
+   {% endif %}
+</body>
+</html>
